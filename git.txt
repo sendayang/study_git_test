@@ -1,0 +1,77 @@
+推至远程仓库
+
+   第一次建立关系：
+   1、先远程建立仓库：alien_invasion
+
+   2、在本地alien_invasion目录下：
+      git remote add origin https://github.com/sendayang/alien_invasion.git
+      git push -u origin master
+
+   3、从现在起，只要本地作了提交，就可以通过以下命令把本地master分支的最新修改推送至GitHub:
+
+   本地提交：git commit -m "TAG_name"
+   推送至远程 ：git push origin master
+
+查看远程：
+    git remote -v
+
+版本回退相关
+   1、git log --pretty=oneline 查看提交历史，其中一长串字符为版本号
+     50a71be9b2a2a36a6e3a73d94510f6470646a95d secend
+     866ec33ae8a03eda361921509f85e757801d7dd5 2019-09-05 09:28
+   
+   2、回退到上一个版本，如上，回退到"2019-09-05 09:28"：
+      上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，
+      所以写成HEAD~100
+
+      git reset --hard HEAD^
+   3、重新取回secend版本，要记得该版本号
+      git reset --hard 50a71be
+   4、如果不记得版本号：
+      git reflog
+
+修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除.
+
+   Git提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作：
+       git stash
+    在master分支上修复，就从master创建临时分支：
+       git checkout master
+    
+       git checkout -b issue-101  --创建issue-101分支
+    修改后add:
+       git add readme.txt
+    修复完成后，切换到master分支，并完成合并，最后删除issue-101分支：
+       git checkout master
+       git merge --no-ff -m "merged bug fix 101" issue-101
+    回到原来的dev分支干活：
+       git checkout dev
+       git status
+    工作区是干净的，刚才的工作现场存到哪去了？用git stash list命令看看：
+       git stash list
+       stash@{0}: WIP on dev: f52c633 add merge
+    恢复两个办法：
+       一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+       另一种方式是用git stash pop，恢复的同时把stash内容也删了：
+    再用git stash list查看，就看不到任何stash内容了：
+       git stash list
+    多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：
+       git stash apply stash@{0}
+
+多人协作：
+   从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+   在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+   建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+   从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+   把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送：
+       git pull
+
+    git pull也失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：
+        git branch --set-upstream-to=origin/dev dev
+    再pull：
+       git pull
+     
+
